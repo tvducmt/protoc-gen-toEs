@@ -1,0 +1,15 @@
+
+syntax = "proto3";
+package proto;
+
+import "google/protobuf/descriptor.proto";
+
+option go_package = "es.proto";
+
+extend google.protobuf.FieldOptions {
+     FieldQuery field               = 66664;
+}
+
+message FieldQuery {
+     string es                       = 1;                   
+ }
