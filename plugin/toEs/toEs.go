@@ -63,19 +63,34 @@ func (c *toEs) generateProto3Message(file *generator.FileDescriptor, message *ge
 	c.P(c.flagPkg.Use(), `.Parse()`)
 
 	for _, field := range message.Field {
-		fieldQeurier := c.getFieldQueryIfAny(field)
-		if fieldQeurier == nil {
+		fieldEs := c.getFieldQueryIfAny(field)
+		if fieldEs == nil {
 			continue
 		}
 		fieldName := c.GetOneOfFieldName(message, field)
 		variableName := "this." + fieldName
 
-		c.generateQuerier(variableName, ccTypeName, fieldQeurier)
+		c.generateEs(variableName, ccTypeName, fieldEs)
 	}
 	c.P(`return nil`)
 	c.P(`}`)
 }
 
+func (c *toEs) generateEs(variableName string, ccTypeName string, fv *es.FieldQuery) {
+
+	// tag := fv.GetQuery()
+	// params := strings.Split(tag, ",")
+	// if len(params) != 2 {
+	// 	glog.Warningln(tag, len(params))
+	// 	return
+	// }
+
+	//switch params[1] {
+	// if fv.GetMatchPhrasePrefix() != "" {
+	// 	b.P(`if !checkNull( ` + variableName + `){`)
+
+	// }
+}
 func (c *toEs) getFieldQueryIfAny(field *descriptor.FieldDescriptorProto) *es.FieldQuery {
 	if field.Options != nil {
 		v, err := proto.GetExtension(field.Options, es.E_Field)

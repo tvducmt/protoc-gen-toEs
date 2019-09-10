@@ -7,9 +7,9 @@ import "google/protobuf/descriptor.proto";
 option go_package = "es.proto";
 
 extend google.protobuf.FieldOptions {
-     FieldQuery field               = 66664;
+     FieldEs field               = 66664;
 }
 
-message FieldQuery {
+message FieldEs {
      string es                       = 1;                   
  }
