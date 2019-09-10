@@ -2,12 +2,12 @@ package toes
 
 import (
 
-	// querier "git.zapa.cloud/merchant-tools/helper/protoc-gen-buildquery/protobuf"
+	// es "git.zapa.cloud/merchant-tools/helper/protoc-gen-buildquery/protobuf"
 
-	pb_svc "go-plugin-demo/client-test/protobuf/copy/report-service"
-	"sync"
-
+	"github.com/gogo/protobuf/proto"
+	"github.com/gogo/protobuf/protoc-gen-gogo/descriptor"
 	"github.com/gogo/protobuf/protoc-gen-gogo/generator"
+	es "github.com/tvducmt/protoc-gen-toEs/protobuf"
 )
 
 type toEs struct {
@@ -23,8 +23,8 @@ type toEs struct {
 	stringsPkg generator.Single
 }
 
-// NewCopy ...
-func NewCopy() generator.Plugin {
+// NewToEs ...
+func NewToEs() generator.Plugin {
 	return &toEs{
 		// query: query,
 	}
@@ -50,91 +50,38 @@ func (c *toEs) Generate(file *generator.FileDescriptor) {
 	c.timePkg = c.NewImport("time")
 	c.flagPkg = c.NewImport("flag")
 
-	c.P(`func indirectType(reflectType reflect.Type) reflect.Type {`)
-	c.P(`for reflectType.Kind() == reflect.Ptr || reflectType.Kind() == reflect.Slice {`)
-	c.P(`reflectType = reflectType.Elem()`)
-	c.P(`}`)
-	c.P(`return reflectType`)
-	c.P(`}`)
-
-	// for _, msg := range file.Messages() {
-
-	// 	c.generateProto3Message(file, msg)
-	// 	// }
-	// }
-	// for _, msg := range file.Messages() {
-
-	// 	c.generateSetFieldMethod(file, msg)
-	// 	// }
-	// }
-}
-
-func (c *copy) generateSetFieldMethod(file *generator.FileDescriptor, message *generator.Descriptor) {
-	ccTypeName := generator.CamelCaseSlice(message.TypeName())
-	for _, field := range message.Field {
-		fieldName := c.GetOneOfFieldName(message, field)
-		c.P(`func (this *`, ccTypeName, `) Set`, fieldName, ` (resp interface{})bool {`)
-		c.P(`if this != nil {`)
-		c.P(`str := fmt.Sprintf("%v", resp)`)
-		c.P(`this.`, fieldName, ` = str`)
-		c.P(`return true`)
-
-		c.P(`}`)
-		c.P(`return false`)
-		c.P(`}`)
+	for _, msg := range file.Messages() {
+		c.generateProto3Message(file, msg)
 	}
 
 }
-func (c *copy) generateField(reqCoreType interface{}, ccTypeName, fieldName string) {
-	c.P(`if _, ok := reqCoreServiceVal.Type().FieldByName("`, fieldName, `"); ok {`)
-	c.P(`if k, ok := resp.(interface {`)
-	c.P(`Set`, fieldName, `(v interface{}) bool`)
-	c.P(`}); ok {`)
-	c.P(`k.Set`, fieldName, `(this.`, fieldName, `)`)
-	c.P(`} else {`)
-	c.P(`}`)
-	//c.P(reqCoreType, `.`, fieldName, ` = this.`, fieldName)
-	c.P(`}`)
-}
 
-func (c *copy) generateProto3Message(file *generator.FileDescriptor, message *generator.Descriptor) {
+func (c *toEs) generateProto3Message(file *generator.FileDescriptor, message *generator.Descriptor) {
 	ccTypeName := generator.CamelCaseSlice(message.TypeName())
-	c.P(`func (this *`, ccTypeName, `) Copy(resp interface{}) {`)
+	c.P(`func (this *`, ccTypeName, `) toEs() map[string]interface{} {`)
 	c.In()
 	c.P(c.flagPkg.Use(), `.Parse()`)
-	once3 := &sync.Once{}
 
-	reqCoreServiceVal := func() {
-		c.P(`reqCoreServiceVal := reflect.Indirect(reflect.ValueOf(resp))`)
-	}
-	reqCoreType := &pb_svc.ListCITransactionsRequest{} // reqCoreServiceVal.Type()
 	for _, field := range message.Field {
-		once3.Do(reqCoreServiceVal)
+		fieldQeurier := c.getFieldQueryIfAny(field)
+		if fieldQeurier == nil {
+			continue
+		}
 		fieldName := c.GetOneOfFieldName(message, field)
-		c.generateField(reqCoreType, ccTypeName, fieldName)
+		variableName := "this." + fieldName
+
+		c.generateQuerier(variableName, ccTypeName, fieldQeurier)
 	}
-
-	// c.P(`reqVal := reflect.Indirect(reflect.ValueOf(`, ccTypeName, `{}))`)
-	// c.P(`reqType := indirectType(reqVal.Type())`)
-	// c.P(`reqCoreServiceVal := reflect.Indirect(reflect.ValueOf(resp))`)
-	// c.P(`fields:= `, fields)
-	// c.P(`for i,v := range  fields {`)
-	// // c.P(`v := reqType.Field(i)`)
-	// // c.P(`fmt.Println(":reqCoreServiceVal.Type()", reqCoreServiceVal.Type().Name())`)
-	// c.P(`if !strings.HasPrefix(v.Name, "XXX_") {`)
-	// c.P(`if f, ok := reqCoreServiceVal.Type().FieldByName(v.Name); ok {`)
-	// c.P(`nameField := v.Name`)
-	// // reqCoreService.ZpTransID = l.GetZpTransID()
-	// // c.P(`reqCoreServiceVal.Type().Name().`, nameField, ` = this.`, nameField)
-	// c.P(`fmt.Println("into here  v.Index", v.Name)`)
-	// //c.P(`fmt.Println("into here  f.Index", f.Name)`)
-	// // fmt.Println("into here  v.Index", v.Index)
-	// // fields = append(fields, &searchField{indexFrom: v.Index, indexTo: f.Index})
-	// c.P(`}`)
-
-	// c.P(`}`)
-	// c.P(`}`)
-
-	// c.Out()
+	c.P(`return nil`)
 	c.P(`}`)
+}
+
+func (c *toEs) getFieldQueryIfAny(field *descriptor.FieldDescriptorProto) *es.FieldQuery {
+	if field.Options != nil {
+		v, err := proto.GetExtension(field.Options, es.E_Field)
+		if err == nil && v.(*es.FieldQuery) != nil {
+			return (v.(*es.FieldQuery))
+		}
+	}
+	return nil
 }

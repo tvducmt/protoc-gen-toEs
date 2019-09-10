@@ -7,7 +7,7 @@ import (
 
 	"github.com/gogo/protobuf/proto"
 	"github.com/gogo/protobuf/protoc-gen-gogo/generator"
-	copy_plugin "github.com/tvducmt/protoc-gen-copy/plugin/copy"
+	toEs_plugin "github.com/tvducmt/protoc-gen-toEs/plugin/toEs"
 )
 
 func main() {
@@ -41,10 +41,10 @@ func main() {
 	gen.WrapTypes()
 	gen.SetPackageNames()
 	gen.BuildTypeNameMap()
-	gen.GeneratePlugin(copy_plugin.NewCopy())
+	gen.GeneratePlugin(toEs_plugin.NewToEs())
 
 	for i := 0; i < len(gen.Response.File); i++ {
-		gen.Response.File[i].Name = proto.String(strings.Replace(*gen.Response.File[i].Name, ".pb.go", ".cp.pb.go", -1))
+		gen.Response.File[i].Name = proto.String(strings.Replace(*gen.Response.File[i].Name, ".pb.go", ".es.pb.go", -1))
 	}
 
 	// Send back the results.
