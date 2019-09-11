@@ -11,5 +11,7 @@ extend google.protobuf.FieldOptions {
 }
 
 message FieldEs {
-     string es                       = 1;                   
+     string es                          = 1;   
+     string timestamp_es                = 2;
+     string date_es                     = 3;                
  }

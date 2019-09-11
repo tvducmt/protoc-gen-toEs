@@ -106,10 +106,6 @@ func (c *toEs) generateProto3Message(file *generator.FileDescriptor, message *ge
 		}
 		fieldName := c.GetOneOfFieldName(message, field)
 		variableName := "this." + fieldName
-
-		//} else if field.IsEnum() {
-		//	c.generateEnumEs(field, variableName, ccTypeName, fieldName, fieldValidator)
-
 		if field.IsMessage() {
 			c.generatePtrAndStructEs(variableName, ccTypeName, fieldName, fieldEs)
 		} else {
@@ -121,8 +117,11 @@ func (c *toEs) generateProto3Message(file *generator.FileDescriptor, message *ge
 }
 
 func (c *toEs) generatePtrAndStructEs(variableName string, ccTypeName string, fieldName string, fv *es.FieldEs) {
-	tag := fv.GetEs()
-	if tag != "" {
+	if fv.GetEs() != "" {
+		c.P(`if !checkNull( ` + variableName + `){`)
+		c.P(`this.Get`, fieldName, `().GetEsMap(makeKeyMap(esMap, "`, fv.GetEs(), `"))`)
+		c.P(`}`)
+	} else if fv.GetTimestampEs() != "" {
 		c.P(`if !checkNull( ` + variableName + `){`)
 		c.P(`if ts, ok := checkTimestampType(`, variableName, `); ok {`)
 		c.P(`if ts != nil {`)
@@ -130,20 +129,19 @@ func (c *toEs) generatePtrAndStructEs(variableName string, ccTypeName string, fi
 		c.P(`if err != nil {`)
 		c.P(c.glogPkg.Use(), `.Errorln(err)`)
 		c.P(`} else {`)
-		c.P(`(*esMap)["`, tag, `"] = tm.UnixNano() / int64(`, c.timePkg.Use(), `.Millisecond)`)
-
+		c.P(`(*esMap)["`, fv.GetTimestampEs(), `"] = tm.UnixNano() / int64(`, c.timePkg.Use(), `.Millisecond)`)
 		c.P(`}`)
 		c.P(`}`)
-		c.P(`} else if date, ok := checkDateType(`, variableName, `); ok {`)
+		c.P(`}`)
+		c.P(`}`)
+	} else if fv.GetDateEs() != "" {
+		c.P(`if !checkNull( ` + variableName + `){`)
+		c.P(`if date, ok := checkDateType(`, variableName, `); ok {`)
 		c.P(`if date != nil {`)
 		c.P(`tm := `, c.protoPkg.Use(), `.DateToTimeSearch(date)`)
-		c.P(`(*esMap)["`, tag, `"] = tm.UnixNano() / int64(`, c.timePkg.Use(), `.Millisecond)`)
-
+		c.P(`(*esMap)["`, fv.GetDateEs(), `"] = tm.UnixNano() / int64(`, c.timePkg.Use(), `.Millisecond)`)
 		c.P(`}`)
-		c.P(`} else {`)
-		c.P(`this.Get`, fieldName, `().GetEsMap(makeKeyMap(esMap, "`, tag, `"))`)
 		c.P(`}`)
-
 		c.P(`}`)
 	}
 }
