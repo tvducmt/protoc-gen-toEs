@@ -1,6 +1,6 @@
 
 syntax = "proto3";
-package proto;
+package es_proto;
 
 import "google/protobuf/descriptor.proto";
 
