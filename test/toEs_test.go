@@ -10,9 +10,6 @@ import (
 )
 
 func TestTimestampType(t *testing.T) {
-	// toDate := &proto.Date{Year: 2019, Month: 9, Day: 23}
-	//transaction := buildProto3(createTime, nil, "", 10, "", TransactionMessage3_TCS_PENDING, "", "tvduc@gmail.com", "0363637773", "dia chi", "nameVal", 32)
-
 	tables := []struct {
 		input  *timestamp.Timestamp
 		output string
