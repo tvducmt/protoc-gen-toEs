@@ -7,9 +7,9 @@ import (
 	fmt "fmt"
 	math "math"
 	proto "github.com/gogo/protobuf/proto"
-	_ "git.zapa.cloud/merchant-tools/helper/proto"
 	_ "github.com/tvducmt/protoc-gen-toEs/protobuf"
 	_ "github.com/golang/protobuf/ptypes/timestamp"
+	_ "git.zapa.cloud/merchant-tools/helper/proto"
 	github_com_golang_glog "github.com/golang/glog"
 	git_zapa_cloud_merchant_tools_helper_proto "git.zapa.cloud/merchant-tools/helper/proto"
 	reflect "reflect"
@@ -75,29 +75,20 @@ func (this *TransactionMessage3) GetEsMap(esMap *map[string]interface{}) {
 			}
 		}
 	}
-	if !checkNull(this.PmcName) {
-		(*esMap)["pmcName"] = this.PmcName
-	}
 	if !checkNull(this.DiscountAmount) {
 		(*esMap)["disCountAmount"] = this.DiscountAmount
 	}
-	if !checkNull(this.TransCode) {
-		(*esMap)["transErrCode"] = this.TransCode
-	}
-	if !checkNull(this.TransChargeStatus) {
-		(*esMap)["transChargeStatus"] = this.TransChargeStatus
+	if !checkNull(this.ItemCount) {
+		(*esMap)["itemCount"] = this.ItemCount
 	}
 	if !checkNull(this.MerchantName) {
 		(*esMap)["merchantName"] = this.MerchantName
 	}
+	if !checkNull(this.TransChargeStatus) {
+		(*esMap)["transChargeStatus"] = this.TransChargeStatus
+	}
 	if !checkNull(this.UserInfo) {
 		this.GetUserInfo().GetEsMap(makeKeyMap(esMap, "userInfo"))
-	}
-	if !checkNull(this.CompanyInfo) {
-		this.GetCompanyInfo().GetEsMap(makeKeyMap(esMap, "companyInfo"))
-	}
-	if !checkNull(this.ItemCount) {
-		(*esMap)["itemCount"] = this.ItemCount
 	}
 }
 func (this *TransactionMessage3_UserInfo) GetEsMap(esMap *map[string]interface{}) {
@@ -108,10 +99,12 @@ func (this *TransactionMessage3_UserInfo) GetEsMap(esMap *map[string]interface{}
 	if !checkNull(this.Phone) {
 		(*esMap)["phoneNumber"] = this.Phone
 	}
-}
-func (this *TransactionMessage3_CompanyInfo) GetEsMap(esMap *map[string]interface{}) {
-	flag.Parse()
-	if !checkNull(this.UserInf) {
-		this.GetUserInf().GetEsMap(makeKeyMap(esMap, "userINFFo"))
+	if !checkNull(this.Birthday) {
+		if date, ok := checkDateType(this.Birthday); ok {
+			if date != nil {
+				tm := git_zapa_cloud_merchant_tools_helper_proto.DateToTimeSearch(date)
+				(*esMap)["birthday"] = tm.UnixNano() / int64(time.Millisecond)
+			}
+		}
 	}
 }

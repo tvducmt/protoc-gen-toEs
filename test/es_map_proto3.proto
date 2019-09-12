@@ -23,41 +23,26 @@ enum TransStatus{
 
 // `DataTransLog` represents data will be reported as table on client in all trasactions.
 message TransactionMessage3{
-    // @inject_tag: es:"reqDate"
     google.protobuf.Timestamp create_time           = 1 [(es_proto.field) = {timestamp_es:"reqTimdestamp"}];
     google.type.Date to_date                        = 2 [(es_proto.field) = {date_es:"reqDate"}];
-    // // @inject_tag: es:"pmcName"
-    string pmc_name                                 = 3 [(es_proto.field) = {es:"pmcName"}]; //add
-    int64  discount_amount                          = 4 [(es_proto.field) = {es:"disCountAmount"}];
-    // @inject_tag: es:"transErrCode"
-    string trans_code                               = 5 [(es_proto.field) = {es:"transErrCode"}];
+    int64  discount_amount                          = 3 [(es_proto.field) = {es:"disCountAmount"}];
+    int32 item_count                                = 4 [(es_proto.field) = {es:"itemCount"}];
+    string merchant_name                            = 5 [(es_proto.field) = {es:"merchantName"}];
+    
     enum TransChargeStatus{
             TCS_UNSPECIFIED = 0;
             TCS_PAID    = 1;
             TCS_UNPAID  = 2;
             TCS_PENDING = 3;
         }
-        // @inject_tag: es:"transChargeStatus"
     TransChargeStatus trans_charge_status           = 6 [(es_proto.field) = {es:"transChargeStatus"}];
-        string merchant_name                        = 7 [(es_proto.field) = {es:"merchantName"}];
-        UserInfo user_info                          = 8 [(es_proto.field) = {es:"userInfo"}];
-        message UserInfo{
-            // @inject_tag: es:"email" query:"*%*"
-            string email        = 1[(es_proto.field) = {es:"email"}];
-            // @inject_tag: es:"phoneNumber" query:"*%*"
-            string phone =       2 [(es_proto.field) = {es:"phoneNumber"}]; //add
-            // @inject_tag: es:"address"
-            string address      = 3; //add
-        }
-    // // // @inject_tag: es:"companyInfo"
-    CompanyInfo company_info                        = 9 [(es_proto.field) = {es:"companyInfo"}];
-    message CompanyInfo{
-        // @inject_tag: es:"name"
-        string name = 1;
-        // @inject_tag: es:"shortName"
-        string short_name = 2;
-        UserInfo user_inf = 3 [(es_proto.field) = {es:"userINFFo"}];
+    
+    UserInfo user_info                          = 7 [(es_proto.field) = {es:"userInfo"}];
+    message UserInfo{
+            string email                    = 1[(es_proto.field) = {es:"email"}];
+            string phone                    = 2 [(es_proto.field) = {es:"phoneNumber"}]; 
+            string address                  = 3; 
+            google.type.Date  birthday      = 4 [(es_proto.field) = {date_es:"birthday"}];
     }
-    int32 item_count                                = 10[(es_proto.field) = {es:"itemCount"}];
    
 }
